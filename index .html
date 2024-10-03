@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+   <html>
+
+   <head>
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+   </head>
+
+   <body>
+       <h1>User List</h1>
+       <ul id="user-list"></ul>
+       <button onclick="refreshUsers()">Refresh</button>
+
+       <h2>Add User</h2>
+       <input type="text" id="new-username" placeholder="Username">
+       <input type="password" id="new-password" placeholder="Password">
+       <button onclick="addUser()">Add</button>
+
+       <h2>Update User</h2>
+       <input type="number" id="update-user-id" placeholder="User ID">
+       <input type="text" id="update-username" placeholder="New Username">
+       <input type="password" id="update-password" placeholder="New Password">
+       <button onclick="updateUser()">Update</button>
+
+       <h2>Delete User</h2>
+       <input type="number" id="delete-user-id" placeholder="User ID">
+       <button onclick="deleteUser()">Delete</button>
+
+       <script>
+           function refreshUsers() {
+               $.get('/users', function (data) {
+                   $('#user-list').empty();
+                   data.forEach(user => {
+                       const listItem = $('<li>').text(user.username);
+                       $('#user-list').append(listItem);
+                   });
+               });
+           }
+
+           function addUser() {
+               const username = $('#new-username').val();
+               const password = $('#new-password').val();
+               $.post('/add_user', { username: username, password: password }, function (data) {
+                   alert(data.message);
+                   refreshUsers();
+               });
+           }
+
+           function updateUser() {
+               const user_id = $('#update-user-id').val();
+               const username = $('#update-username').val();
+               const password = $('#update-password').val();
+               $.ajax({
+                   url: `/update_user/${user_id}`,
+                   type: 'PUT',
+                   contentType: 'application/json',
+                   data: JSON.stringify({ username: username, password: password }),
+                   success: function (data) {
+                       alert(data.message);
+                       refreshUsers();
+                   },
+                   error: function (error) {
+                       alert(error.responseJSON.message);
+                   }
+               });
+           }
+
+           function deleteUser() {
+               const user_id = $('#delete-user-id').val();
+               $.ajax({
+                   url: `/delete_user/${user_id}`,
+                   type: 'DELETE',
+                   success: function (data) {
+                       alert(data.message);
+                       refreshUsers();
+                   },
+                   error: function (error) {
+                       alert(error.responseJSON.message);
+                   }
+               });
+           }
+       </script>
+   </body>
+
+   </html>
